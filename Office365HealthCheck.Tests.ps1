@@ -4,16 +4,26 @@ Import-Module -Name Pester
 # First check and make sure we're connected to the required services:
 try {
     Get-AzureADTenantDetail -ErrorAction Stop | Out-Null
+}
+catch {
+    throw "You must run Connect-AzureAD before executing these tests."
+}
+
+try {
     Get-MsolCompanyInformation -ErrorAction Stop | Out-Null
 }
-catch [Microsoft.Open.Azure.AD.CommonLibrary.AadNeedAuthenticationException] {
-    throw "You must run Connect-AzureAD before executing these tests. Trying to do that now ..."
-    Connect-AzureAD    
+catch {
+    throw "You must run Connect-MsolService before executing these tests."
 }
-catch [Microsoft.Online.Administration.Automation.MicrosoftOnlineException] {
-    throw "You must run Connect-MsolService before executing these tests. Trying to do that now ..."
-    Connect-MsolService
+
+# Make sure the EXO module is present
+if (
+    -not (Get-Module | Where-Object { ($_.Name -ilike "tmp_*") -and ($_.Description -ilike "Implicit remoting for https://outlook.office365.com/PowerShell-LiveId*") })
+) {
+    # EXO module is not present
+    throw "You must run Connect-EXOPSSession before executing these tests."
 }
+    
 
 $Settings = @{
     "LastDirSyncThreshold"     = 120 # DirSync should have run in the last 2 hours
