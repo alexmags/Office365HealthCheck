@@ -41,7 +41,29 @@ Describe "Tenant Checks" {
             $AzureADTenantDetails.ProvisioningErrors | Should -Be $null
         }
         It "Technical Contact Email Should be a Distribution Group" {
-            $false | Should -Be $true
+            # Check that at least one member of TechnicalNotificationMails is a Group or Distribution Group
+
+            $SupportedRecipientTypes = @(
+                "MailUniversalDistributionGroup",
+                "DynamicDistributionGroup",
+                "GroupMailbox",
+                "MailNonUniversalGroup",
+                "MailUniversalSecurityGroup",
+                "RemoteSharedMailbox",
+                "RemoteTeamMailbox",
+                "SharedMailbox",
+                "TeamMailbox"
+            )
+
+            $FoundAGroup = $false
+            foreach ($TechnicalNotificationMail in $AzureADTenantDetails.TechnicalNotificationMails) {
+                Remove-Variable TechnicalNotificationMailRecipient -ErrorAction SilentlyContinue
+                $TechnicalNotificationMailRecipient = Get-Recipient $TechnicalNotificationMail -RecipientTypeDetails $SupportedRecipientTypes -ErrorAction SilentlyContinue
+                if ($TechnicalNotificationMailRecipient) {
+                    $FoundAGroup = $true
+                }
+            }
+            $FoundAGroup | Should -Be $true
         }
 
         It "Self-Service Password Reset should be Enabled" {
