@@ -15,11 +15,12 @@ reviewed before implementation.
 * Technical Contact should be a distribution group or shared mailbox
 * Self-Service Password Reset should be enabled
 * Users should be allowed to create Groups
+* Administrators should have MFA enabled
 
 ### Azure AD/DirSync
 
-The DirSync tests follow two paths, when DirSync is either enabled or disabled
-in the tenant.
+The DirSync tests follow two paths, based on whether DirSync is either enabled
+or disabled in the tenant.
 
 #### DirSync is Enabled
 

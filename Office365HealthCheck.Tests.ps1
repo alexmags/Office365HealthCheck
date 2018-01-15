@@ -32,6 +32,9 @@ if (
 $Settings = @{
     "LastDirSyncThreshold"     = 120 # DirSync should have run in the last 2 hours
     "DirSyncDeletionThreshold" = 500
+    "AzureADNonMFARoles"       = @( # Azure AD roles that do not require MFA
+        "Directory Synchronization Accounts"
+    )
 }
 
 $AzureADTenantDetails = Get-AzureADTenantDetail
@@ -74,9 +77,28 @@ Describe -Tag "Tenant" -Name "Tenant Checks" {
             $MsolCompanyInformation.SelfServePasswordResetEnabled | Should -Be $true
         }
 
-        It "Users Should be Allowed to Create Groups" {
+        It "Users should be Allowed to Create Groups" {
             $MsolCompanyInformation.UsersPermissionToCreateGroupsEnabled | Should -Be $true
         }
+
+        It "Administrators should have MFA enabled" {
+            # Get all Azure AD admin roles, except those in "AzureADNonMFARoles"
+            $AdminsWithoutMfa = @()
+            Get-AzureADDirectoryRole | 
+                Where-Object {$settings.AzureADNonMFARoles -notcontains $_ } |
+                ForEach-Object {
+
+                # Get all the members of the role
+                $RoleMemberIds = $_ | Get-AzureADDirectoryRoleMember | Select-Object -ExpandProperty ObjectId
+                foreach ($RoleMemberId in $RoleMemberIds) {
+                    $AdminsWithoutMfa += Get-MsolUser -ObjectId $RoleMemberId -ErrorAction SilentlyContinue | Where-Object { $_.StrongAuthenticationRequirements.State -ne "Enforced" }
+                }
+
+            }
+
+            $AdminsWithoutMfa | Select-Object -ExpandProperty UserPrincipalName -Unique | Should -Be $null
+        }
+
     }
 
     Context "DirSync" {
