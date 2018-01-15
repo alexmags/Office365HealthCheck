@@ -85,7 +85,7 @@ Describe -Tag "Tenant" -Name "Tenant Checks" {
             # Get all Azure AD admin roles, except those in "AzureADNonMFARoles"
             $AdminsWithoutMfa = @()
             Get-AzureADDirectoryRole | 
-                Where-Object {$settings.AzureADNonMFARoles -notcontains $_ } |
+                Where-Object {$settings.AzureADNonMFARoles -notcontains $_.DisplayName } |
                 ForEach-Object {
 
                 # Get all the members of the role
