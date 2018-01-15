@@ -35,7 +35,7 @@ $AzureADDomains = Get-AzureADDomain
 $MsolCompanyInformation = Get-MsolCompanyInformation
 $MsolAccountSku = Get-MsolAccountSku
 
-Describe "Tenant Checks" {
+Describe -Tag "Tenant" -Name "Tenant Checks" {
     Context "Tenant Details" {
         It "Provisioning Errors Should be Empty" {
             $AzureADTenantDetails.ProvisioningErrors | Should -Be $null
@@ -81,20 +81,20 @@ Describe "Tenant Checks" {
             It "DirSync is Enabled" {
                 $MsolCompanyInformation.DirectorySynchronizationEnabled | Should -Be $true
             }
-            It "DirSync has run recently" {
+            It "DirSync should have run recently" {
                 $DirSyncLowWaterMark = (Get-Date).ToUniversalTime().AddMinutes(0 - $Settings.LastDirSyncThreshold)
                 Get-Date $AzureADTenantDetails.CompanyLastDirSyncTime | Should -BeGreaterThan $DirSyncLowWaterMark
             }
 
-            It "No users have DirSync Provisioning Errors" {
+            It "No users should have DirSync provisioning errors" {
                 Get-MsolHasObjectsWithDirSyncProvisioningErrors | Should -Be $false
             }
 
-            It "Password Hash Synchronization is enabled" {
+            It "Password Hash Synchronization should be enabled" {
                 $MsolCompanyInformation.PasswordSynchronizationEnabled | Should -Be $true
             }
 
-            It "DirSync Deletion Threshold is appropriate" {
+            It "DirSync deletion threshold should be appropriate" {
                 Get-MsolDirSyncConfiguration | Select-Object -ExpandProperty AccidentalDeletionThreshold | Should -BeLessThan ($Settings.DirSyncDeletionThreshold + 1)
             }
         }
@@ -117,7 +117,7 @@ Describe "Tenant Checks" {
                 "Federated" {
                     if ($Domain.IsRoot) {
                         $DomainFederationSettings = Get-MsolDomainFederationSettings -DomainName $Domain.Name
-                        It "Has a valid federation signing certificate" {
+                        It "Domain has a valid federation signing certificate" {
                             Remove-Variable certString -ErrorAction SilentlyContinue
                             Remove-Variable certByteArray -ErrorAction SilentlyContinue
                             Remove-Variable cert -ErrorAction SilentlyContinue
@@ -152,6 +152,14 @@ Describe "Tenant Checks" {
             It "Should have no SuspendedUnits" {
                 $sku.SuspendedUnits | Should -Be 0
             }
+        }
+    }
+}
+
+Describe -Tag "EXO" -Name "Exchange Online Checks" {
+    Context "Recipients" {
+        It "Should be no outstanding migration batches" {
+            Get-MigrationBatch | Should -Be $null
         }
     }
 }
