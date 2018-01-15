@@ -35,6 +35,17 @@ $Settings = @{
     "AzureADNonMFARoles"       = @( # Azure AD roles that do not require MFA
         "Directory Synchronization Accounts"
     )
+    "AdminGroupThreshold"      = 10 # Should be fewer than this many members in Admin Groups
+    "AdminGroups"              = @( # Admin Groups to check membership count of
+        "Company Administrator",
+        "Lync Service Administrator",
+        "Security Administrator",
+        "CRM Service Administrator",
+        "SharePoint Service Administrator",
+        "Power BI Service Administrator",
+        "Privileged Role Administrator",
+        "Exchange Service Administrator"
+    )
 }
 
 $AzureADTenantDetails = Get-AzureADTenantDetail
@@ -79,6 +90,22 @@ Describe -Tag "Tenant" -Name "Tenant Checks" {
 
         It "Users should be Allowed to Create Groups" {
             $MsolCompanyInformation.UsersPermissionToCreateGroupsEnabled | Should -Be $true
+        }
+
+        It "Admin Groups should have limited membership" {
+            $results = @()
+            Get-AzureADDirectoryRole | 
+                Where-Object { $settings.AdminGroups -contains $_.DisplayName } | 
+                ForEach-Object {
+                $results += New-Object -TypeName PSObject -Property @{
+                    "Group"   = $_.DisplayName
+                    "Members" = ($_ | Get-AzureADDirectoryRoleMember | Measure-Object).Count
+                }
+            }
+            $results | 
+                Where-Object { $_.Members -ge $settings.AdminGroupThreshold } |
+                Should -Be $null
+
         }
 
         It "Administrators should have MFA enabled" {

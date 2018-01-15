@@ -15,6 +15,7 @@ reviewed before implementation.
 * Technical Contact should be a distribution group or shared mailbox
 * Self-Service Password Reset should be enabled
 * Users should be allowed to create Groups
+* Admin Groups should have limited membership
 * Administrators should have MFA enabled
 
 ### Azure AD/DirSync
