@@ -1,4 +1,8 @@
 
+#Requires -Modules @{ModuleName="Pester";ModuleVersion="4.0.0"}
+#Requires -Modules @{ModuleName="AzureAD";ModuleVersion="2.0.0.0"}
+#Requires -Modules @{ModuleName="MSOnline";ModuleVersion="1.1.0.0"}
+
 Import-Module -Name Pester
 
 # First check and make sure we're connected to the required services:
