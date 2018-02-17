@@ -87,6 +87,11 @@ the Pester test output into a nice Word document.
 Invoke-Pester | Format-Pester -Format word -GroupResultsBy Result-Describe-Context
 ```
 
+## More Information
+
+* Author: Chris Brown ([@chrisbrownie](https://github.com/chrisbrownie))
+* [Blog Post](https://flamingkeys.com/office-365-health-check)
+
 ## License
 
 Office 365 Health Check is released under the MIT license (MIT). Full text of the license is available [here](https://github.com/chrisbrownie/Office365HealthCheck/blob/master/LICENSE).
